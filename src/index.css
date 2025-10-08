@@ -1,0 +1,69 @@
+:root, [data-bs-theme=light] {
+    --primary-color: #6a478f;
+    --primary-color-darken: #4f356b;
+    --secondary-color: #a35000;
+    --bs-secondary-bg: #b3b1da;
+    --bs-tertiary-bg: #b3b1da;
+    --bs-tertiary-bg-rgb: 79, 53, 107;
+    --bs-light-rgb: 248, 249, 250;
+    --white: #ffffff;
+}
+
+#root {
+    flex: 1;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+        monospace;
+}
+
+[data-bs-theme=dark] {
+    --bs-light-rgb: 33, 37, 41;
+}
+
+[data-bs-theme="dark"] .plot-container {
+    filter: invert(75%) hue-rotate(180deg);
+}
+
+.btn-primary, .btn-success {
+    background-color: var(--primary-color);
+}
+
+.btn-success {
+    --bs-btn-font-weight: 600;
+    --bs-btn-color: var(--bs-white);
+    --bs-btn-bg: var(--primary-color);
+    --bs-btn-border-color: var(--primary-color);
+    --bs-btn-border-radius: .5rem;
+    --bs-btn-hover-color: var(--bs-white);
+    --bs-btn-hover-bg: var(--primary-color-darken);
+    --bs-btn-hover-border-color: var(--primary-color-darken);
+    --bs-btn-focus-shadow-rgb: var(--primary-color);
+    --bs-btn-active-color: var(--bs-btn-hover-color);
+    --bs-btn-active-bg: var(--primary-color-darken);
+    --bs-btn-active-border-color: var(--primary-color-darken);
+    --bs-btn-disabled-bg: var(--bs-secondary-bg);
+    --bs-btn-disabled-border-color: var(--bs-secondary-bg);
+}
+
+.pagination {
+    --bs-pagination-active-bg: var(--primary-color);
+    --bs-pagination-active-border-color: var(--primary-color-darken);
+    --bs-pagination-border-color: var(--primary-color-darken);
+    --bs-pagination-color: var(--primary-color);
+    --bs-pagination-focus-color: var(--primary-color);
+    --bs-pagination-hover-color: var(--primary-color);
+}
