@@ -46,7 +46,7 @@ export default function TopNav({ theme, setTheme }: Props) {
           <Nav.Link onClick={endSession}>End session</Nav.Link>
         </Nav>
         <ThemeSwitch theme={theme} setTheme={setTheme} />
-        <a className="text-body-secondary" href="https://github.com/seroanalytics/seroviz">
+        <a className="text-body-secondary" href="https://github.com/seroanalytics/seroviz-web">
           <svg className="bi" width="24" height="24">
             <GithubLogo />
           </svg>

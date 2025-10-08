@@ -66,7 +66,7 @@ export default function FAQ() {
                     How do I request new features?
                 </li>
                 Please raise a GitHub issue on the <a
-                href={"https://github.com/seroanalytics/seroviz"}>seroviz
+                href={"https://github.com/seroanalytics/seroviz-web"}>seroviz-web
                 repo</a>.
             </ul>
         </Col>
