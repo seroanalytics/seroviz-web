@@ -59,15 +59,15 @@ export default function App() {
     <RootContext.Provider value={state}>
       <RootDispatchContext.Provider value={dispatch}>
         <div data-bs-theme={theme}>
-          <TopNav 
-            theme={theme as string}
-            setTheme={setTheme as (newState: string) => void}
-          />
-          {state.genericErrors.map((e, index) => (
-            <AppError error={e} key={"error" + index} />
-          ))}
-          <Container fluid>
-            <BrowserRouter basename="/seroviz-web">
+          <BrowserRouter basename={process.env.NODE_ENV === 'production' ? '/seroviz-web' : ''}>
+            <TopNav 
+              theme={theme as string}
+              setTheme={setTheme as (newState: string) => void}
+            />
+            {state.genericErrors.map((e, index) => (
+              <AppError error={e} key={"error" + index} />
+            ))}
+            <Container fluid>
               <Routes>
                 <Route path="/" element={<ManageDatasets />} />
                 <Route path="/dataset/:name" element={<ExploreDataset isPublic={false} />} />
@@ -76,8 +76,8 @@ export default function App() {
                 <Route path="FAQ" element={<FAQ />} />
                 <Route path="*" element={<NoPage />} />
               </Routes>
-            </BrowserRouter>
-          </Container>
+            </Container>
+          </BrowserRouter>
         </div>
       </RootDispatchContext.Provider>
     </RootContext.Provider>
