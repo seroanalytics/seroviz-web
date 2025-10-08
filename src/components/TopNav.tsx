@@ -3,6 +3,7 @@ import ThemeSwitch from "./ThemeSwitch";
 import React, { useContext } from "react";
 import { RootContext, RootDispatchContext } from "../RootContext";
 import { dataService } from "../services/dataService";
+import { Link } from "react-router-dom";
 
 interface Props {
   theme: string;
@@ -37,9 +38,9 @@ export default function TopNav({ theme, setTheme }: Props) {
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link href="/">Manage datasets</Nav.Link>
-            <Nav.Link href="/public">Public datasets</Nav.Link>
-            <Nav.Link href="/faq">FAQ</Nav.Link>
+            <Nav.Link as={Link} to="/">Manage datasets</Nav.Link>
+            <Nav.Link as={Link} to="/public">Public datasets</Nav.Link>
+            <Nav.Link as={Link} to="/faq">FAQ</Nav.Link>
           </Nav>
         </Navbar.Collapse>
         <Nav>

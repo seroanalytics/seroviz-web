@@ -53,7 +53,7 @@ export default function App() {
             <AppError error={e} key={"error" + index} />
           ))}
           <Container fluid>
-            <BrowserRouter>
+            <BrowserRouter basename="/seroviz-web">
               <Routes>
                 <Route path="/" element={<ManageDatasets />} />
                 <Route path="/dataset/:name" element={<ExploreDataset isPublic={false} />} />
