@@ -21,15 +21,15 @@ A browser-based version of SeroViz that combines the R backend functionality wit
 
 1. Clone the repository
 2. Install dependencies:
+
    ```bash
    npm install
    ```
-
 3. Start the development server:
+
    ```bash
    npm start
    ```
-
 4. Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 ## Usage
@@ -42,6 +42,7 @@ A browser-based version of SeroViz that combines the R backend functionality wit
 ## Data Format
 
 Your CSV file should contain the following columns:
+
 - `biomarker`: The biomarker identifier
 - `value`: The antibody titre value
 - `day` (or custom): Time point identifier
@@ -62,24 +63,8 @@ Additional columns can be used for covariates and filtering.
 - `npm start`: Runs the app in development mode
 - `npm build`: Builds the app for production
 - `npm test`: Launches the test runner
-- `npm run lint`: Runs ESLint
-
-### Project Structure
-
-```
-src/
-├── components/          # React components
-├── services/           # WebR service and data handling
-├── hooks/              # Custom React hooks
-├── reducers/           # State management
-├── types.ts            # TypeScript type definitions
-└── RootContext.ts      # React context for state
-```
-
-## License
-
-GPL-3.0
+- `npm run lint`: Runs ESLintLicense
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a Pull Request or email david.hodgson@charite.de if you have ideas to make this better!
