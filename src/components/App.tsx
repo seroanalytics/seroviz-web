@@ -27,6 +27,20 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
+    // GitHub Pages SPA redirect handling
+    // This handles the redirect from 404.html for client-side routing
+    const pathSegmentsToKeep = 1;
+    const l = window.location;
+    if (l.search) {
+      const p = l.search.slice(1).split('&').map(s => s.replace(/~and~/g, '&')).find(s => s.startsWith('/'));
+      if (p) {
+        const newPath = l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + p;
+        window.history.replaceState(null, '', newPath);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     // Initialize WebR and load initial data
     const initializeApp = async () => {
       try {
