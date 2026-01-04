@@ -165,21 +165,21 @@ export default function LinePlot({
         layout={{
             title: {
                 text: title,
-                font: { size: 14, family: 'Arial, sans-serif' }
+                font: { size: 16, family: 'Avenir, Arial, sans-serif' }
             },
             showlegend: colorBy !== "none",
             legend: {
                 orientation: 'v',
                 x: 1.02,
                 y: 1,
-                font: { size: 10 }
+                font: { size: 11, family: 'Avenir, Arial, sans-serif' }
             },
             xaxis: {
                 title: {
                     text: state.datasetMetadata?.xcol,
-                    font: { size: 11 }
+                    font: { size: 13, family: 'Avenir, Arial, sans-serif' }
                 },
-                tickfont: { size: 9 },
+                tickfont: { size: 11, family: 'Avenir, Arial, sans-serif' },
                 showline: true,
                 linewidth: 1.5,
                 linecolor: '#333',
@@ -192,9 +192,9 @@ export default function LinePlot({
             yaxis: {
                 title: {
                     text: scale === "natural" ? "value" : `${scale} value`,
-                    font: { size: 11 }
+                    font: { size: 13, family: 'Avenir, Arial, sans-serif' }
                 },
-                tickfont: { size: 9 },
+                tickfont: { size: 11, family: 'Avenir, Arial, sans-serif' },
                 showline: true,
                 linewidth: 1.5,
                 linecolor: '#333',
@@ -207,7 +207,7 @@ export default function LinePlot({
             margin: { l: 60, r: 100, t: title ? 40 : 20, b: 50 },
             paper_bgcolor: 'white',
             plot_bgcolor: 'white',
-            font: { family: 'Arial, sans-serif', color: '#333' }
+            font: { family: 'Avenir, Arial, sans-serif', color: '#333' }
         }}
         config={{toImageButtonOptions: {filename: toFilename(title || 'plot')}}}
         useResizeHandler={true}
