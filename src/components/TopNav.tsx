@@ -31,7 +31,7 @@ export default function TopNav({ theme, setTheme }: Props) {
       <Container fluid>
         <img
           alt="SeroViz logo"
-          src={theme === "dark" ? "logolight.png" : "logo.png"}
+          src={theme === "dark" ? `${process.env.PUBLIC_URL}/logolight.png` : `${process.env.PUBLIC_URL}/logo.png`}
           width={120}
           className={"me-3"}
         />
