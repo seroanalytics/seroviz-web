@@ -26,7 +26,7 @@ export default function SplineOptions() {
     const onChangeKnots = (event: any) => {
         dispatch({
             type: ActionType.SET_SPLINE_OPTIONS,
-            payload: {k: between(event.target.value, 5, 30)}
+            payload: {k: between(event.target.value, 1, 30)}
         });
     }
 
@@ -42,41 +42,46 @@ export default function SplineOptions() {
                              name="method"
                              value={settings.method} onChange={onChangeMethod}>
                     <option>auto</option>
+                    <option>linear</option>
                     <option>gam</option>
                     <option>loess</option>
                 </Form.Select>
             </Col>
         </Row>
-        <Row className={"mt-2"}>
-            <Form.Label column sm="6" htmlFor="span">
-                Span:
-            </Form.Label>
-            <Col sm="6">
-                <Form.Range min={0} max={1} step={0.05} value={settings.span}
-                            onChange={onChangeSpan}/>
-                <Form.Control type={"number"}
-                              name={"span"}
-                              value={settings.span}
-                              min={0}
-                              max={1}
-                              step={0.05}
-                              onChange={onChangeSpan}/>
-            </Col>
-        </Row>
-        <Row className={"mt-2"}>
-            <Form.Label column sm="6" htmlFor="k">
-                k:
-            </Form.Label>
-            <Col sm="6">
-                <Form.Range min={5} max={30} step={1} value={settings.k}
-                            onChange={onChangeKnots}/>
-                <Form.Control type={"number"}
-                              name={"k"}
-                             value={settings.k}
-                              min={5}
-                              max={30}
-                             onChange={onChangeKnots}/>
-            </Col>
-        </Row>
+        {settings.method === "loess" && (
+            <Row className={"mt-2"}>
+                <Form.Label column sm="6" htmlFor="span">
+                    Span:
+                </Form.Label>
+                <Col sm="6">
+                    <Form.Range min={0} max={1} step={0.05} value={settings.span}
+                                onChange={onChangeSpan}/>
+                    <Form.Control type={"number"}
+                                  name={"span"}
+                                  value={settings.span}
+                                  min={0}
+                                  max={1}
+                                  step={0.05}
+                                  onChange={onChangeSpan}/>
+                </Col>
+            </Row>
+        )}
+        {settings.method === "gam" && (
+            <Row className={"mt-2"}>
+                <Form.Label column sm="6" htmlFor="k">
+                    k:
+                </Form.Label>
+                <Col sm="6">
+                    <Form.Range min={1} max={30} step={1} value={settings.k}
+                                onChange={onChangeKnots}/>
+                    <Form.Control type={"number"}
+                                  name={"k"}
+                                 value={settings.k}
+                                  min={1}
+                                  max={30}
+                                 onChange={onChangeKnots}/>
+                </Col>
+            </Row>
+        )}
     </Form.Group>
 }

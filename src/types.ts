@@ -104,6 +104,8 @@ export interface DatasetSettings {
   scale: "log" | "natural" | "log2";
   splineSettings: SplineSettings;
   individualSettings: IndividualSettings;
+  colorBy: string;
+  facetBy: string;
 }
 
 export interface AppState {

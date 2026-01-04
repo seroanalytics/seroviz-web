@@ -142,7 +142,8 @@ export class DataService {
     covariateSettings: CovariateSettings[],
     scale: "log" | "natural" | "log2",
     splineSettings: SplineSettings,
-    isPublic: boolean
+    isPublic: boolean,
+    disaggregate?: string
   ): Promise<void | GenericResponse<DataSeries>> {
     try {
       const traces = covariateSettings
@@ -153,7 +154,7 @@ export class DataService {
         selectedDataset,
         biomarker,
         facetDefinition || undefined,
-        traces || undefined,
+        disaggregate || traces || undefined,
         scale,
         splineSettings.method,
         splineSettings.span,

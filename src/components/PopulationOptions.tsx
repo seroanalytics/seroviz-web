@@ -1,5 +1,4 @@
 import Form from "react-bootstrap/Form";
-import SplineOptions from "./SplineOptions";
 import CovariateOptions from "./CovariateOptions";
 import SelectedCovariate from "./SelectedCovariate";
 import React, {useContext} from "react";
@@ -20,10 +19,6 @@ export default function PopulationOptions() {
         .filter(v => v.levels.length < 30 && selectedCovariates.indexOf(v.name) === -1) ?? [];
 
     return <fieldset>
-        <Form.Label>
-            Spline options
-        </Form.Label>
-        <SplineOptions/>
         {availableCovariates.length > 0 &&
             <Form.Group className="mb-3">
                 <Form.Label>Disaggregate by</Form.Label>

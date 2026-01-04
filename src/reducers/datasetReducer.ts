@@ -26,6 +26,10 @@ export const datasetReducer = (state: AppState, action: RootAction): AppState =>
       return setSpline(state, action);
     case ActionType.SET_INDIVIDUAL_OPTIONS:
       return setIndividualOptions(state, action);
+    case ActionType.SELECT_COLOR_BY:
+      return selectColorBy(state, action);
+    case ActionType.SELECT_FACET_BY:
+      return selectFacetBy(state, action);
     default:
       return state;
   }
@@ -48,7 +52,9 @@ const datasetSettings = (): DatasetSettings => ({
   covariateSettings: [],
   scale: "natural",
   splineSettings: splineSettings(),
-  individualSettings: individualSettings()
+  individualSettings: individualSettings(),
+  colorBy: "biomarker",
+  facetBy: "none"
 });
 
 const selectDataset = (state: AppState, action: RootAction): AppState => {
@@ -96,8 +102,14 @@ const selectScale = (state: AppState, action: RootAction): AppState => {
 
 const setSpline = (state: AppState, action: RootAction): AppState => {
   const newState = { ...state };
-  const settings = newState.datasetSettings[state.selectedDataset].splineSettings;
-  newState.datasetSettings[state.selectedDataset].splineSettings = { ...settings, ...action.payload };
+  const currentSettings = newState.datasetSettings[state.selectedDataset];
+  newState.datasetSettings = {
+    ...newState.datasetSettings,
+    [state.selectedDataset]: {
+      ...currentSettings,
+      splineSettings: { ...currentSettings.splineSettings, ...action.payload }
+    }
+  };
   return newState;
 };
 
@@ -105,5 +117,31 @@ const setIndividualOptions = (state: AppState, action: RootAction): AppState => 
   const newState = { ...state };
   const settings = newState.datasetSettings[state.selectedDataset].individualSettings;
   newState.datasetSettings[state.selectedDataset].individualSettings = { ...settings, ...action.payload };
+  return newState;
+};
+
+const selectColorBy = (state: AppState, action: RootAction): AppState => {
+  const newState = { ...state };
+  const currentSettings = newState.datasetSettings[state.selectedDataset];
+  newState.datasetSettings = {
+    ...newState.datasetSettings,
+    [state.selectedDataset]: {
+      ...currentSettings,
+      colorBy: action.payload
+    }
+  };
+  return newState;
+};
+
+const selectFacetBy = (state: AppState, action: RootAction): AppState => {
+  const newState = { ...state };
+  const currentSettings = newState.datasetSettings[state.selectedDataset];
+  newState.datasetSettings = {
+    ...newState.datasetSettings,
+    [state.selectedDataset]: {
+      ...currentSettings,
+      facetBy: action.payload
+    }
+  };
   return newState;
 };

@@ -266,26 +266,28 @@ export class SeroVizService {
       // Load the data to get variable information
       const dataResponse = await fetch(`${baseUrl}/datasets/${name}/data`);
       const dataText = await dataResponse.text();
-      const lines = dataText.split('\n');
-      const header = lines[0].split(',').map(h => h.replace(/"/g, ''));
+      const lines = dataText.split('\n').filter(l => l.trim());
+      const header = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
       
-      // Find biomarker column and get unique values
-      const biomarkerCol = header.findIndex(col => col.toLowerCase().includes('biomarker'));
-      const biomarkers = biomarkerCol >= 0 ? 
-        Array.from(new Set(lines.slice(1).map(line => {
-          const values = line.split(',');
-          return values[biomarkerCol]?.replace(/"/g, '');
-        }).filter(Boolean))) as string[] : [];
+      // Parse all data to get unique values for each column
+      const data = this.parseCSV(dataText);
+      
+      // Get biomarkers
+      const biomarkers = Array.from(new Set(data.map((row: any) => row.biomarker))) as string[];
+      
+      // Get all variables except xcol, value, and biomarker
+      const xcolName = xcol.trim();
+      const variables = header
+        .filter(col => !['value', 'biomarker', xcolName].includes(col))
+        .map(col => ({
+          name: col,
+          levels: Array.from(new Set(data.map((row: any) => row[col]))) as (string | number | null)[]
+        }));
 
       return {
-        variables: [
-          {
-            name: "biomarker",
-            levels: biomarkers
-          }
-        ],
-        biomarkers: biomarkers,
-        xcol: xcol.trim(),
+        variables,
+        biomarkers,
+        xcol: xcolName,
         type: seriesType.trim() as "surveillance" | "post-exposure"
       };
     } catch (error) {
@@ -614,6 +616,8 @@ export class SeroVizService {
       return { x: [], y: [] };
     }
 
+    console.log('fitModel called with:', { method, span, k, dataLength: data.length });
+
     try {
       // Convert data to R format
       const rData = data.map(row => ({
@@ -635,9 +639,14 @@ export class SeroVizService {
           
           // Use base R functions only
           let modelCode = '';
-          if (method === 'gam' || (method === 'auto' && data.length > 1000)) {
+          if (method === 'linear') {
+            // Simple linear regression
+            modelCode = `model <- lm(y ~ x, data = df)`;
+          } else if (method === 'gam' || (method === 'auto' && data.length > 1000)) {
             // Use polynomial regression as GAM alternative
-            modelCode = `model <- lm(y ~ poly(x, degree = 3), data = df)`;
+            // k parameter controls the polynomial degree (capped at 10 to avoid overfitting)
+            const degree = Math.min(k, 10);
+            modelCode = `model <- lm(y ~ poly(x, degree = ${degree}), data = df)`;
           } else {
             // Use LOESS model (base R function)
             modelCode = `model <- loess(y ~ x, data = df, span = ${span})`;
@@ -672,9 +681,14 @@ export class SeroVizService {
         
         let yseq: number[];
         
-        if (method === 'gam' || (method === 'auto' && data.length > 1000)) {
+        if (method === 'linear') {
+          // Simple linear regression
+          yseq = this.linearRegression(xValues, yValues, xseq);
+        } else if (method === 'gam' || (method === 'auto' && data.length > 1000)) {
           // Use polynomial regression for GAM-like behavior
-          yseq = this.polynomialRegression(xValues, yValues, xseq, 3);
+          // k parameter controls the polynomial degree (capped at 10 to avoid overfitting)
+          const degree = Math.min(k, 10);
+          yseq = this.polynomialRegression(xValues, yValues, xseq, degree);
         } else {
           // Use LOESS-like smoothing
           yseq = this.loessSmoothing(xValues, yValues, xseq, span);
@@ -714,6 +728,20 @@ export class SeroVizService {
   }
 
   // Enhanced statistical methods
+  private linearRegression(x: number[], y: number[], xPred: number[]): number[] {
+    // Simple linear regression: y = mx + b
+    const n = x.length;
+    const sumX = x.reduce((a, b) => a + b, 0);
+    const sumY = y.reduce((a, b) => a + b, 0);
+    const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
+    const sumXX = x.reduce((sum, xi) => sum + xi * xi, 0);
+    
+    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
+    const intercept = (sumY - slope * sumX) / n;
+    
+    return xPred.map(xVal => slope * xVal + intercept);
+  }
+  
   private polynomialRegression(x: number[], y: number[], xPred: number[], degree: number): number[] {
     // Simple polynomial regression implementation
     const n = x.length;
@@ -729,41 +757,130 @@ export class SeroVizService {
   }
 
   private calculatePolynomialCoefficients(x: number[], y: number[], degree: number): number[] {
-    // Simplified polynomial coefficient calculation
+    // Polynomial regression using least squares
     const n = x.length;
-    const coefficients: number[] = new Array(degree + 1).fill(0);
     
-    // For simplicity, use linear regression for now
-    // In a full implementation, you'd solve the normal equations
-    const sumX = x.reduce((a, b) => a + b, 0);
-    const sumY = y.reduce((a, b) => a + b, 0);
-    const sumXY = x.reduce((sum, xi, i) => sum + xi * y[i], 0);
-    const sumXX = x.reduce((sum, xi) => sum + xi * xi, 0);
+    // Build the Vandermonde matrix
+    const X: number[][] = [];
+    for (let i = 0; i < n; i++) {
+      const row: number[] = [];
+      for (let j = 0; j <= degree; j++) {
+        row.push(Math.pow(x[i], j));
+      }
+      X.push(row);
+    }
     
-    const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
-    const intercept = (sumY - slope * sumX) / n;
+    // Calculate X^T * X
+    const XtX: number[][] = [];
+    for (let i = 0; i <= degree; i++) {
+      XtX[i] = [];
+      for (let j = 0; j <= degree; j++) {
+        let sum = 0;
+        for (let k = 0; k < n; k++) {
+          sum += X[k][i] * X[k][j];
+        }
+        XtX[i][j] = sum;
+      }
+    }
     
-    coefficients[0] = intercept;
-    coefficients[1] = slope;
+    // Calculate X^T * y
+    const Xty: number[] = [];
+    for (let i = 0; i <= degree; i++) {
+      let sum = 0;
+      for (let k = 0; k < n; k++) {
+        sum += X[k][i] * y[k];
+      }
+      Xty[i] = sum;
+    }
+    
+    // Solve XtX * coefficients = Xty using Gaussian elimination
+    const coefficients = this.gaussianElimination(XtX, Xty);
     
     return coefficients;
   }
+  
+  private gaussianElimination(A: number[][], b: number[]): number[] {
+    const n = A.length;
+    const Ab: number[][] = A.map((row, i) => [...row, b[i]]);
+    
+    // Forward elimination
+    for (let i = 0; i < n; i++) {
+      // Find pivot
+      let maxRow = i;
+      for (let k = i + 1; k < n; k++) {
+        if (Math.abs(Ab[k][i]) > Math.abs(Ab[maxRow][i])) {
+          maxRow = k;
+        }
+      }
+      [Ab[i], Ab[maxRow]] = [Ab[maxRow], Ab[i]];
+      
+      // Make all rows below this one 0 in current column
+      for (let k = i + 1; k < n; k++) {
+        const factor = Ab[k][i] / Ab[i][i];
+        for (let j = i; j <= n; j++) {
+          Ab[k][j] -= factor * Ab[i][j];
+        }
+      }
+    }
+    
+    // Back substitution
+    const x: number[] = new Array(n);
+    for (let i = n - 1; i >= 0; i--) {
+      x[i] = Ab[i][n];
+      for (let j = i + 1; j < n; j++) {
+        x[i] -= Ab[i][j] * x[j];
+      }
+      x[i] /= Ab[i][i];
+    }
+    
+    return x;
+  }
 
   private loessSmoothing(x: number[], y: number[], xPred: number[], span: number): number[] {
-    // Simplified LOESS-like smoothing
+    // LOESS (Locally Weighted Scatterplot Smoothing)
+    const n = x.length;
+    
     return xPred.map(xVal => {
-      const weights = x.map(xi => {
-        const distance = Math.abs(xi - xVal);
-        const maxDistance = Math.max(...x.map(xj => Math.abs(xj - xVal)));
-        const normalizedDistance = distance / maxDistance;
-        return Math.pow(1 - Math.pow(normalizedDistance, 3), 3);
+      // Calculate distances from xVal to all data points
+      const distances = x.map(xi => Math.abs(xi - xVal));
+      
+      // Determine the number of neighbors based on span
+      const numNeighbors = Math.max(2, Math.floor(span * n));
+      
+      // Get the distance to the k-th nearest neighbor
+      const sortedDistances = [...distances].sort((a, b) => a - b);
+      const maxDistance = sortedDistances[Math.min(numNeighbors - 1, n - 1)];
+      
+      // Tricube weight function
+      const weights = distances.map(d => {
+        if (maxDistance === 0) return 1;
+        const u = d / maxDistance;
+        return u <= 1 ? Math.pow(1 - Math.pow(u, 3), 3) : 0;
       });
       
-      const totalWeight = weights.reduce((a, b) => a + b, 0);
-      if (totalWeight === 0) return 0;
+      // Weighted least squares regression (linear fit)
+      const sumW = weights.reduce((sum, w) => sum + w, 0);
       
-      const weightedSum = y.reduce((sum, yi, i) => sum + yi * weights[i], 0);
-      return weightedSum / totalWeight;
+      if (sumW === 0) {
+        // Fallback to nearest point
+        const nearestIdx = distances.indexOf(Math.min(...distances));
+        return y[nearestIdx];
+      }
+      
+      const meanX = weights.reduce((sum, w, i) => sum + w * x[i], 0) / sumW;
+      const meanY = weights.reduce((sum, w, i) => sum + w * y[i], 0) / sumW;
+      
+      const numerator = weights.reduce((sum, w, i) => sum + w * (x[i] - meanX) * (y[i] - meanY), 0);
+      const denominator = weights.reduce((sum, w, i) => sum + w * Math.pow(x[i] - meanX, 2), 0);
+      
+      if (denominator === 0) {
+        return meanY;
+      }
+      
+      const slope = numerator / denominator;
+      const intercept = meanY - slope * meanX;
+      
+      return slope * xVal + intercept;
     });
   }
 
